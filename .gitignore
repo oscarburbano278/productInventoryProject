@@ -1,0 +1,5 @@
+backend/.env
+# Ignore .env de la carpeta backend
+
+
+
