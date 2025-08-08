@@ -1,4 +1,9 @@
-backend/.env
+# Ignorar carpetas de dependencias de Node.js
+/backend/node_modules/
+/frontend/node_modules/
+
+# Ignorar archivos de entorno
+.env
 # Ignore .env de la carpeta backend
 
 
