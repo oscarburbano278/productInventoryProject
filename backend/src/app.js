@@ -24,8 +24,9 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
-// Rutas
+// Rutas de la API
 app.use('/api/products', require('./routes/product.routes'));
+app.use('/api/auth', require('./routes/auth.routes')); // Agregando las rutas de autenticación
 
 // Ruta de prueba inicial
 app.get('/', (req, res) => {
