@@ -1,22 +1,11 @@
-// frontend/src/components/ProductTable.js
 import React from 'react';
 
-// El componente recibe la lista de productos como una prop
-const ProductTable = ({ products }) => {
+// Agregamos `onEditClick` como una prop
+const ProductTable = ({ products, onEditClick,onDeleteClick }) => {
   return (
     <table className="product-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Descripción</th>
-          <th>Precio</th>
-          <th>Stock</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
+      {/* ... (encabezado de la tabla) ... */}
       <tbody>
-        {/* Verifica si hay productos antes de mapear */}
         {products.length === 0 ? (
           <tr>
             <td colSpan="6">No hay productos disponibles.</td>
@@ -30,9 +19,18 @@ const ProductTable = ({ products }) => {
               <td>${product.price.toFixed(2)}</td>
               <td>{product.stock}</td>
               <td>
-                {/* Agregaremos los botones de acción aquí */}
-                <button className="edit-btn">Editar</button>
-                <button className="delete-btn">Eliminar</button>
+                <button 
+                  className="edit-btn" 
+                  onClick={() => onEditClick(product)} // Llama a la función con el producto
+                >
+                  Editar
+                </button>
+                <button 
+                  className="delete-btn" 
+                  onClick={() => onDeleteClick(product.id)} // Llama a la función con el ID
+                >
+                  Eliminar
+                </button>
               </td>
             </tr>
           ))

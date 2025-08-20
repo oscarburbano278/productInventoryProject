@@ -1,81 +1,98 @@
-// frontend/src/pages/Home.js
-
 import React, { useEffect, useState } from 'react';
-import { getProducts } from '../services/productService';
-import { createProduct } from '../services/productService';
+import { getProducts, createProduct, updateProduct, deleteProduct } from '../services/productService'; 
 import ProductTable from '../components/ProductTable';
 import ProductFormModal from '../components/ProductFormModal';
-import '../styles/styles.css';
-
+import "../styles/styles.css";
 
 function HomePage() {
-  // Estado para almacenar la lista de productos
   const [products, setProducts] = useState([]);
-  // Estado para manejar el estado de carga
   const [loading, setLoading] = useState(true);
-  // Estado para manejar cualquier error que pueda ocurrir
   const [error, setError] = useState(null);
-
-   // Estado para controlar la visibilidad del modal
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // Nuevo estado para guardar el producto que se va a editar
+  const [productToEdit, setProductToEdit] = useState(null);
 
-  useEffect(() => {
-    // Función asíncrona para obtener los productos del backend
-    const fetchProducts = async () => {
-      try {
-        // Llama a la función del servicio
-        const productsData = await getProducts();
-        // Actualiza el estado con los productos obtenidos
-        setProducts(productsData);
-      } catch (err) {
-        // Si hay un error, actualiza el estado de error
-        setError("Error al cargar los productos.");
-        console.error(err);
-      } finally {
-        // En cualquier caso (éxito o error), la carga ha terminado
-        setLoading(false);
-      }
-    };
-    
-    fetchProducts();
-    // El array vacío `[]` como segundo argumento asegura que este efecto
-    // se ejecute solo una vez, cuando el componente se monta por primera vez.
-  }, []);
-
-   // Función para guardar un nuevo producto
-  const handleSaveProduct = async (productData) => {
+  const fetchProducts = async () => {
     try {
-      const newProduct = await createProduct(productData);
-      // Actualizamos la lista de productos sin tener que volver a pedir todos los datos
-      setProducts([...products, newProduct]);
+      const productsData = await getProducts();
+      setProducts(productsData);
     } catch (err) {
-      console.error("Error al crear el producto:", err);
-      // Aquí puedes manejar el error de forma más elegante
+      setError("Error al cargar los productos.");
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const handleSaveProduct = async (productData) => {
+    try {
+      // Si productData tiene un ID, es una edición
+      if (productData.id) {
+        const updatedProduct = await updateProduct(productData.id, productData);
+        // Actualizamos la lista de productos
+        setProducts(products.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+      } else {
+        // Si no, es una creación
+        const newProduct = await createProduct(productData);
+        setProducts([...products, newProduct]);
+      }
+    } catch (err) {
+      console.error("Error al guardar el producto:", err);
+    }
+  };
+
+  // Nueva función para eliminar un producto
+  const handleDeleteProduct = async (productId) => {
+    const isConfirmed = window.confirm('¿Estás seguro de que deseas eliminar este producto?');
+    if (isConfirmed) {
+      try {
+        await deleteProduct(productId);
+        // Filtramos el producto eliminado de la lista de productos
+        setProducts(products.filter(p => p.id !== productId));
+      } catch (err) {
+        console.error("Error al eliminar el producto:", err);
+        alert("Hubo un error al intentar eliminar el producto.");
+      }
+    }
+  };
+
+
+
+  // Nueva función para manejar el clic en "Editar"
+  const handleEditClick = (product) => {
+    setProductToEdit(product); // Guardamos el producto en el estado
+    setIsModalOpen(true); // Abrimos el modal
+  };
+
+  // Función para cerrar el modal y limpiar el estado de edición
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setProductToEdit(null); // Importante para que el próximo modal sea de creación
+  };
+
   if (loading) {
-    // Muestra un mensaje de carga mientras se obtienen los datos
-    return <div>Cargando productos...</div>
+    return <div>Cargando productos...</div>;
   }
 
   if (error) {
-    // Muestra un mensaje de error si la petición falla
     return <div>{error}</div>;
   }
 
   return (
     <div>
       <h1>Lista de Productos</h1>
-      {/* Botón para abrir el modal */}
-      <button onClick={() => setIsModalOpen(true)}>Crear Producto</button>
-      <ProductTable products={products} />
+      <button onClick={() => { setIsModalOpen(true); setProductToEdit(null); }}>Crear Producto</button>
+      <ProductTable products={products} onEditClick={handleEditClick} onDeleteClick={handleDeleteProduct}/>
 
-      {/* El modal se renderiza condicionalmente */}
       <ProductFormModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         onSave={handleSaveProduct}
+        productToEdit={productToEdit}
       />
     </div>
   );
