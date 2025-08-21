@@ -1,19 +1,29 @@
 // frontend/src/services/productService.js
-
-// Define la URL base de tu API. Asegúrate de que coincida con la dirección donde corre tu backend.
-const API_BASE_URL = 'http://localhost:3000/api'; 
-const API_PRODUCTS_URL = `${API_BASE_URL}/products`;
+const API_URL = "http://localhost:3000/api/products";
 
 // Función para obtener todos los productos
 export const getProducts = async () => {
+  const token = localStorage.getItem("token");
+  
+  if (!token) {
+    throw new Error("No hay token de autenticación. Por favor, inicie sesión.");
+  }
+  
   try {
-    const response = await fetch(API_PRODUCTS_URL);
+    const response = await fetch(API_URL, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+    });
+
     if (!response.ok) {
-      // Manejo de errores si la respuesta no es exitosa (e.g., 404, 500)
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
-    const data = await response.json(); // Parsea la respuesta JSON
-    return data;
+
+    return await response.json();
   } catch (error) {
     console.error("Error fetching products:", error);
     throw error;
@@ -22,58 +32,84 @@ export const getProducts = async () => {
 
 // Función para crear un nuevo producto
 export const createProduct = async (productData) => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("No hay token de autenticación.");
+  }
+
   try {
-    const response = await fetch(API_PRODUCTS_URL, {
-      method: 'POST', // Método HTTP para crear recursos
+    const response = await fetch(API_URL, {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json', // Le dice al servidor que estamos enviando JSON
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
-      body: JSON.stringify(productData), // Convierte el objeto de datos a una cadena JSON
+      body: JSON.stringify(productData),
     });
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
-    const data = await response.json();
-    return data;
+
+    return await response.json();
   } catch (error) {
     console.error("Error creating product:", error);
     throw error;
   }
 };
 
-// Función para actualizar un producto (ejemplo)
+// Función para actualizar un producto existente
 export const updateProduct = async (productId, productData) => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("No hay token de autenticación.");
+  }
+
   try {
-    const response = await fetch(`${API_PRODUCTS_URL}/${productId}`, {
-      method: 'PUT', // o 'PATCH' dependiendo de tu API
+    const response = await fetch(`${API_URL}/${productId}`, {
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify(productData),
     });
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
-    const data = await response.json();
-    return data;
+
+    return await response.json();
   } catch (error) {
     console.error("Error updating product:", error);
     throw error;
   }
 };
 
-// Función para eliminar un producto (ejemplo)
+// Función para eliminar un producto
 export const deleteProduct = async (productId) => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("No hay token de autenticación.");
+  }
+
   try {
-    const response = await fetch(`${API_PRODUCTS_URL}/${productId}`, {
-      method: 'DELETE',
+    const response = await fetch(`${API_URL}/${productId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
     });
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
-    // No esperamos un cuerpo de respuesta JSON para una eliminación exitosa,
-    // pero podemos devolver un mensaje o el estatus.
-    return { status: response.status, message: 'Producto eliminado' };
+
+    return { message: "Producto eliminado correctamente" };
   } catch (error) {
     console.error("Error deleting product:", error);
     throw error;

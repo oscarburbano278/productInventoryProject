@@ -1,17 +1,16 @@
 // frontend/src/App.jsx
-
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import HomePage from './pages/Home';
-// Importa otros componentes de páginas si los tienes
+import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import AuthProvider from './context/AuthContext.jsx'; // ¡Sin llaves!
+import AppRouter from './routes/AppRouter.jsx';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        {/* Agrega otras rutas aquí */}
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <AppRouter />
+      </Router>
+    </AuthProvider>
   );
 }
 
